@@ -11,9 +11,9 @@ actable
 .. image:: https://codecov.io/gh/michaelpb/actable/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/michaelpb/actable
 
-Flexible activity stream supporting an arbitrary number of associated objects
-and fast denormalized look-ups. Rendering can be fast too, with in-DB cached
-HTML and/or context.
+Flexible activity stream for Python Django supporting an arbitrary number of
+associated objects and fast denormalized look-ups. Rendering can be fast too,
+with in-DB cached HTML and/or context.
 
 The purpose of Actable is to make it easy and unobtrusive to add activity
 log-like streams to as many objects in your database as possible, and make
