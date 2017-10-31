@@ -2,10 +2,21 @@
 
 {% block content %}
 <div class="row m-t-2">
-    <h3>posts for {{ username }}</h3>
-    {% for post in posts %}
-        {{ post }}
-    {% endfor %}
+    <div style="min-width: 45vw">
+        <h3>activity for {{ username }}</h3>
+        <h3>posts for {{ username }}</h3>
+        {% for post in posts %}
+            <p>{{ post }} - {{ post.body }}</p>
+        {% endfor %}
+    </div>
+    <div>
+        <h3>Edit author: {{username }}</h3>
+        <form action="." method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" />
+        </form>
+    </div>
 </div>
 {% endblock content %}
 
