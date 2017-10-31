@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row m-t-2">
+    <h3>posts for {{ username }}</h3>
+    {% for post in posts %}
+        {{ post }}
+    {% endfor %}
+</div>
+{% endblock content %}
+
+

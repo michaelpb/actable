@@ -30,7 +30,7 @@ of relations specified by a dictionary, as such:
 .. code-block:: python
 
     class ProjectBlogPost:
-        def get_actable_context(self):
+        def get_actable_relations(self):
             # 'Alice created Blog Post Title about Project Name, on the topic
             # of Space'
             return {

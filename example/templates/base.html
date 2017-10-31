@@ -8,11 +8,6 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-  <!--[if lt IE 9]>
-  <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
-
   {% block css %}
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">
@@ -47,6 +42,7 @@
 
 <div class="container">
 
+    <h1>MICROBLOG - Actable example</h1>
   {% if messages %}
   {% for message in messages %}
   <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
