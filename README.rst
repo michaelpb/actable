@@ -56,7 +56,8 @@ Install actable::
 
     pip install actable
 
-Add it to your `INSTALLED_APPS`:
+Add it to your `INSTALLED_APPS`, and specify which models to which you wish it
+to register save hooks:
 
 .. code-block:: python
 
@@ -66,19 +67,10 @@ Add it to your `INSTALLED_APPS`:
         ...
     )
 
-Add actable's URL patterns:
-
-.. code-block:: python
-
-    from actable import urls as actable_urls
-
-
-    urlpatterns = [
-        ...
-        url(r'^', include(actable_urls)),
-        ...
+    ACTABLE_MODELS = [
+        'myapp.MyModel',
+        'myapp.MyOtherModel',
     ]
-
 
 Use
 ---

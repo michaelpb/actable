@@ -1,25 +1,29 @@
+import json
+
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models, transaction
 
-def default_get_actable_relations(obj):
-    ctx = {}
-    ctx['object'] = obj
-    if hasattr(obj, 'author'):
-        ctx['subject'] = obj.author
-    elif hasattr(obj, 'user'):
-        ctx['subject'] = obj.user
-    return ctx
+def get_gfk(instance):
+    # TODO refactor into shared utils
+    content_type = ContentType.objects.get_for_model(instance)
+    return {
+        'content_type': content_type,
+        'object_id': instance.id,
+    }
+
 
 class ActableBase(models.Model):
     class Meta:
         abstract = True
-        get_latest_by = 'date'
+        get_latest_by = '-date'
 
     # Related object
-    content_type = models.ForeignKey(ContentType, null=True, blank=True)
-    object_id = models.PositiveIntegerField(null=True, blank=True)
-    topic_object = GenericForeignKey()
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    # , db_index=True)
+    content_object = GenericForeignKey()
 
     cached_html = models.TextField(
         help_text='Cached HTML snippet',
@@ -44,14 +48,32 @@ class ActableBase(models.Model):
         default=False,
     )
 
+
 class ActableEvent(ActableBase):
     cache_updated_date = models.DateTimeField(
         help_text='Date that the cache of this event was last updated',
         auto_now=True,
     )
 
+    is_creation = models.BooleanField(
+        help_text='Mark if this event is the creation of the principle object',
+        default=False,
+    )
+
+    def save(self, **kwargs):
+        relation_context = self.get_relation_context()
+        is_new = not self.id
+        self.regenerate_cache(relation_context)
+        with transaction.atomic():
+            super().save()  # Ensure get ID first
+
+            if not is_new:
+                # Delete all existing associated
+                ActableRelation.objects.filter(event=self).delete()
+            self.create_relations_from_self(relation_context)
+
     def get_principle_object(self):
-        return self.topic_object
+        return self.content_object
 
     def rerender_to_cache(self):
         # TODO: Add option to pass in pre-fetched relations since often
@@ -78,51 +100,37 @@ class ActableEvent(ActableBase):
         relations = [
             ActableRelation(
                 relation=relation_name,
-                topic_object=topic_object,
                 cached_html=self.cached_html,
                 cached_json=self.cached_json,
                 date=self.date,
                 event=self,
+                **get_gfk(content_object),
             )
-            for relation_name, topic_object in relation_context.items()
+            for relation_name, content_object in relation_context.items()
         ]
         ActableRelation.objects.bulk_create(relations)
+        print('this is the relations', relations)
 
     def get_relation_context(self):
         '''
-        Gets the relevant context for the object
+        Gets all related objects to this event
         '''
-        if hasattr(self.topic_object, 'get_actable_relations'):
-            return self.topic_object.get_actable_relations()
-        return default_get_actable_relations(self.topic_object)
+        return self.content_object.get_actable_relations(self)
 
     def get_json(self, relation_context):
-        if not hasattr(self.topic_object, 'get_actable_json'):
+        if not hasattr(self.content_object, 'get_actable_json'):
             return None
-        return self.topic_object.get_actable_json(relation_context)
+        return self.content_object.get_actable_json(self)
 
     def get_html(self, relation_context):
-        if not hasattr(self.topic_object, 'get_actable_html'):
+        if not hasattr(self.content_object, 'get_actable_html'):
             return None
-        return self.topic_object.get_actable_html(relation_context)
+        return self.content_object.get_actable_html(self)
 
     def regenerate_cache(self, relation_context):
         self.cached_html = self.get_html(relation_context)
         json_dict = self.get_json(relation_context)
-        self.cached_json = json.dumps(json_dict)
-
-    def save(self, **kwargs):
-        relation_context = self.get_relation_context()
-        is_new = not self.id
-        self.regenerate_cache(relation_context)
-        with transaction.atomic():
-            super().save()  # Ensure get ID first
-
-            if not is_new:
-                # Delete all existing associated
-                ActableRelation.objects.filter(event=self).delete()
-            self.create_relations_from_self(relation_context)
-
+        self.cached_json = json.dumps(json_dict) if json_dict else None
 
 class ActableRelation(ActableBase):
     '''
@@ -138,5 +146,8 @@ class ActableRelation(ActableBase):
     )
 
     def get_principle_object(self):
-        return self.event.topic_object
+        return self.event.content_object
+
+    def __str__(self):
+        return '%s: %s (%s)' % (self.relation, str(self.content_object), self.date)
 
