@@ -15,6 +15,10 @@ def get_gfk(instance):
 
 
 class ActableBase(models.Model):
+    '''
+    Base object shared by both the ActableEvent and ActableRelation, so that
+    the cached data is available in both.
+    '''
     class Meta:
         abstract = True
         get_latest_by = '-date'
@@ -49,6 +53,12 @@ class ActableBase(models.Model):
 
 
 class ActableEvent(ActableBase):
+    '''
+    Represents a singular event: Generated one of these constitutes generating
+    an event, and the content_object related to this is the "principle object".
+    Useful for generating a global stream, and regenerating Relations if
+    anything changes.
+    '''
     cache_updated_date = models.DateTimeField(
         help_text='Date that the cache of this event was last updated',
         auto_now=True,
@@ -82,6 +92,9 @@ class ActableEvent(ActableBase):
         self.render_to_cache(relations)
 
     def render(self, template_string, relations):
+        '''
+        Renders all 
+        '''
         context = {
             relation.relation: relation.context_object
             for relation in relations
@@ -111,21 +124,33 @@ class ActableEvent(ActableBase):
 
     def get_relation_context(self):
         '''
-        Gets all related objects to this event
+        Gets all related objects to this event, as determined by the principle
+        object.
         '''
         return self.content_object.get_actable_relations(self)
 
     def get_json(self, relation_context):
+        '''
+        Generates the JSON object from the principle object given the (assumed
+        pre-fetched) relation context.
+        '''
         if not hasattr(self.content_object, 'get_actable_json'):
             return None
         return self.content_object.get_actable_json(self)
 
     def get_html(self, relation_context):
+        '''
+        Generates the HTML from the principle object given the (assumed
+        pre-fetched) relation context.
+        '''
         if not hasattr(self.content_object, 'get_actable_html'):
             return None
         return self.content_object.get_actable_html(self)
 
     def regenerate_cache(self, relation_context):
+        '''
+        Update cached HTML and JSON dict (for this event only)
+        '''
         self.cached_html = self.get_html(relation_context)
         json_dict = self.get_json(relation_context)
         self.cached_json = json.dumps(json_dict) if json_dict else None

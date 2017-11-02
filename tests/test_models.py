@@ -65,6 +65,7 @@ class TestActableModels(TestCase):
         self.assertEqual(len(ActableEvent.objects.all()), 1)
         self.assertEqual(len(ActableRelation.objects.all()), 2)
 
+        # Check JSON
         all_jsons = set([
             act.cached_json for act in list(ActableRelation.objects.all()) +
                 list(ActableEvent.objects.all())
@@ -79,6 +80,15 @@ class TestActableModels(TestCase):
             'verb': 'updated',
         }
         self.assertEqual(json_parsed, expected_json)
+
+        # Check HTML
+        all_htmls = set([
+            act.cached_html for act in list(ActableRelation.objects.all()) +
+                list(ActableEvent.objects.all())
+        ])
+        self.assertEqual(len(all_htmls), 1)
+        html = list(all_htmls)[0]
+        self.assertEqual(html, '<strong>alice</strong> wrote title')
 
     def tearDown(self):
         pass

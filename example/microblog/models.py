@@ -41,7 +41,6 @@ class MicroPost(models.Model):
     def get_absolute_url(self):
         return '/post/%s/' % str(self.id)
 
-
     def get_actable_json(self, event):
         verb = 'wrote' if event.is_creation else 'updated'
         return {
@@ -51,6 +50,9 @@ class MicroPost(models.Model):
             'object_url': self.get_absolute_url(),
             'verb': verb,
         }
+
+    def get_actable_html(self, event):
+        return '<strong>%s</strong> wrote %s' % (self.author.name, self.title)
 
 
 class Follow(models.Model):
