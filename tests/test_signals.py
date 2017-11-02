@@ -7,31 +7,24 @@ test_helpers
 
 Tests for `actable` helper functions and classes.
 """
+import json
 
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
-from actable.models import ActableEvent, ActableRelation
 from actable.apps import check_and_get_actable_models
+from actable.signals import post_save_handler
 from django.core.exceptions import ImproperlyConfigured
+from example.microblog.models import Author
+from actable.models import ActableEvent
 
-class TestActableHelpers(TestCase):
-    def setUp(self):
-        self.author = Author.objects.create(
-            name='alice',
-            bio='alice in wonderland',
-        )
+from actable.utils import get_gfk
 
+class TestActableSettings(SimpleTestCase):
     def test_settings_empty_pagination(self):
         class FauxSettings:
             ACTABLE_MODELS = []
-        models = check_and_get_actable_model(FauxSettings)
+        models = check_and_get_actable_models(FauxSettings)
         self.assertEqual(models, [])
-
-    def test_settings_invalid(self):
-        class FauxSettings:
-            pass
-        with self.assertRaises(ImproperlyConfigured):
-            check_and_get_actable_model(FauxSettings)
 
     def test_settings_valid(self):
         class FauxSettings:
@@ -40,7 +33,7 @@ class TestActableHelpers(TestCase):
                 'microblog.Author',
                 'microblog.Follow',
             ]
-        models = check_and_get_actable_model(FauxSettings)
+        models = check_and_get_actable_models(FauxSettings)
         self.assertEqual(len(models), 3)
 
     def test_settings_invalid_model(self):
@@ -50,8 +43,35 @@ class TestActableHelpers(TestCase):
                 'auth.User',
             ]
         with self.assertRaises(ImproperlyConfigured) as cm:
-            check_and_get_actable_model(FauxSettings)
-        self.assertIn('implement get_actable_relations', str(cm.exception))
+            check_and_get_actable_models(FauxSettings)
+        self.assertIn('must implement', str(cm.exception))
 
-    def tearDown(self):
-        pass
+class TestActableSignals(TestCase):
+    def test_post_save_handler_created(self):
+        author = Author.objects.create(
+            name='alice',
+            bio='alice in wonderland',
+        )
+        author.save()
+        post_save_handler(Author, instance=author, created=True)
+        event = ActableEvent.objects.get(**get_gfk(author))
+        self.assertEqual(json.loads(event.cached_json), {
+            'subject': 'alice',
+            'subject_url': '/posts/alice/',
+            'verb': 'joined',
+        })
+
+    def test_post_save_handler_updated(self):
+        author = Author.objects.create(
+            name='alice',
+            bio='alice in wonderland',
+        )
+        author.save()
+
+        post_save_handler(Author, instance=author, created=False)
+        event = ActableEvent.objects.get(**get_gfk(author))
+        self.assertEqual(json.loads(event.cached_json), {
+            'subject': 'alice',
+            'subject_url': '/posts/alice/',
+            'verb': 'updated their profile',
+        })
