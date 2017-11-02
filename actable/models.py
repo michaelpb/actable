@@ -21,8 +21,7 @@ class ActableBase(models.Model):
 
     # Related object
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    # , db_index=True)
+    object_id = models.PositiveIntegerField(db_index=True)
     content_object = GenericForeignKey()
 
     cached_html = models.TextField(
@@ -109,7 +108,6 @@ class ActableEvent(ActableBase):
             for relation_name, content_object in relation_context.items()
         ]
         ActableRelation.objects.bulk_create(relations)
-        print('this is the relations', relations)
 
     def get_relation_context(self):
         '''

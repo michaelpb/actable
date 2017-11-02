@@ -5,6 +5,10 @@ from django.contrib.contenttypes.models import ContentType
 from actable.models import ActableRelation
 
 def get_gfk(instance):
+    '''
+    Given a model instance, returns a dictionary of the content_type and
+    object_id to allow for easy searching
+    '''
     content_type = ContentType.objects.get_for_model(instance)
     return {
         'content_type': content_type,
@@ -23,8 +27,15 @@ def parse_json_list(json_list):
         for item in json_list
     ]
 
+class HtmlWrapper(dict):
+    def __str__(self):
+        return self['cached_html']
+
+def parse_html_list(html_list):
+    return [HtmlWrapper(item) for item in html_list]
+
 def get_events(instance, key, start=None, end=None):
     kwargs = get_gfk(instance)
     results = ActableRelation.objects.filter(**kwargs)
-    return list(results.order_by('-date').values(key, 'date'))
+    return results.order_by('-date').values(key, 'date')
 

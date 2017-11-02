@@ -22,7 +22,9 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sites",
-    "actable",
+    "example.microblog",
+
+    "actable.apps.ActableConfig",
 ]
 
 SITE_ID = 1
