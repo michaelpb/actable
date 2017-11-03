@@ -5,13 +5,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models, transaction
 
-def get_gfk(instance):
-    # TODO refactor into shared utils
-    content_type = ContentType.objects.get_for_model(instance)
-    return {
-        'content_type': content_type,
-        'object_id': instance.id,
-    }
+from actable.utils import get_gfk
+
+
+def get_events(instance, key, start=None, end=None):
+    kwargs = get_gfk(instance)
+    results = ActableRelation.objects.filter(**kwargs)
+    return results.order_by('-date').values(key, 'date')
 
 
 class ActableBase(models.Model):
@@ -155,6 +155,7 @@ class ActableEvent(ActableBase):
         json_dict = self.get_json(relation_context)
         self.cached_json = json.dumps(json_dict) if json_dict else None
 
+
 class ActableRelation(ActableBase):
     '''
     Relates a single event to all related objects, storing a copy of the cached
@@ -173,4 +174,3 @@ class ActableRelation(ActableBase):
 
     def __str__(self):
         return '%s: %s (%s)' % (self.relation, str(self.content_object), self.date)
-

@@ -2,8 +2,6 @@ import json
 
 from django.contrib.contenttypes.models import ContentType
 
-from actable.models import ActableRelation
-
 def get_gfk(instance):
     '''
     Given a model instance, returns a dictionary of the content_type and
@@ -15,16 +13,17 @@ def get_gfk(instance):
         'object_id': instance.id,
     }
 
-def get_all_json_events(instance):
-    return parse_json_list(get_events(instance, 'cached_json'))
-
-def parse_json_list(json_list):
+def parse_json_list(json_iterable):
+    '''
+    Given an iterable containing dicts with cached_json and dates, parse the
+    JSON and flatten each into a single dict.
+    '''
     return [
         dict(
             date=item['date'],
             **(json.loads(item['cached_json']) if item['cached_json'] else {})
         )
-        for item in json_list
+        for item in json_iterable
     ]
 
 class HtmlWrapper(dict):
@@ -32,10 +31,8 @@ class HtmlWrapper(dict):
         return self['cached_html']
 
 def parse_html_list(html_list):
+    '''
+    Given an iterable containing dicts with HTML and dates, flatten into a dict
+    that resolves to the HTML when treated like a string.
+    '''
     return [HtmlWrapper(item) for item in html_list]
-
-def get_events(instance, key, start=None, end=None):
-    kwargs = get_gfk(instance)
-    results = ActableRelation.objects.filter(**kwargs)
-    return results.order_by('-date').values(key, 'date')
-

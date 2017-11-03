@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator, Page
 
-from actable.utils import get_events, parse_json_list, parse_html_list
+from actable.utils import parse_json_list, parse_html_list
+from actable.models import get_events
 
 class EventHtmlPaginator(Paginator):
     def __init__(self, model_instance, *args, **kwargs):
