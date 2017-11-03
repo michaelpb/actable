@@ -11,7 +11,8 @@ Django Actable
 .. image:: https://codecov.io/gh/michaelpb/actable/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/michaelpb/actable
 
-* **NOTE:** Presently *only* supports Python 3.5+ and Django 1.9+
+* **NOTE:** Presently *only* supports Python 3.5+ and Django 1.9+ (see [issue
+  #1](https://github.com/michaelpb/actable/issues/1))
 
 Activity stream for Python Django. Unlike other activity streams, it is much
 more flexible, with every event designed to supporting an arbitrary number of
@@ -40,12 +41,17 @@ Quick start
 **Overview:**
 
 1. Install actable and put in requirements file
+
 2. Add to INSTALLED_APPS
+
 3. Pick several important models to implement the actable interface so that
 every save or update generates an event
+
 4. Add those models to ACTABLE_MODELS
+
 5. Use helper classes to add a streams to your views
 
+---------------
 
 Install:
 
@@ -128,6 +134,7 @@ Example:
             )
 
 Finally, you should list your newly improved as an ``ACTABLE_MODEL``, as such:
+
 .. code-block:: python
 
     ACTABLE_MODELS = [
