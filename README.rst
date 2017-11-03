@@ -11,6 +11,8 @@ Django Actable
 .. image:: https://codecov.io/gh/michaelpb/actable/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/michaelpb/actable
 
+* **NOTE:** Presently *only* supports Python 3.5+ and Django 1.9+
+
 Activity stream for Python Django. Unlike other activity streams, it is much
 more flexible, with every event designed to supporting an arbitrary number of
 associated objects. It also is designed to be unobtrusive: Any of your models
