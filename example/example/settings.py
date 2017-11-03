@@ -107,7 +107,7 @@ STATIC_URL = '/static/'
 
 ###########################
 ###########################
-########################### Actable stuff goes below
+# Actable stuff goes below
 ###########################
 ###########################
 
@@ -116,14 +116,3 @@ ACTABLE_MODELS = [
     'microblog.Author',
     'microblog.Follow',
 ]
-
-
-
-
-
-
-
-
-
-
-

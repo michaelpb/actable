@@ -8,11 +8,11 @@ test_helpers
 Tests for `actable` helper functions and classes.
 """
 
-from django.test import TestCase
-
-from actable.models import ActableEvent, ActableRelation
 from actable.helpers import EventDictPaginator, EventHtmlPaginator
+from actable.models import ActableEvent
+from django.test import TestCase
 from example.microblog.models import Author, MicroPost
+
 
 class TestActableHelpers(TestCase):
     def setUp(self):

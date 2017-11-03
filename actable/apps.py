@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 from django.core.exceptions import ImproperlyConfigured
 
+
 def check_and_get_actable_models(settings):
     '''
     Given a settings object, look through all actable models and ensure they
@@ -23,18 +24,20 @@ def check_and_get_actable_models(settings):
 
         if hasattr(model_class, 'get_actable_context'):
             raise ImproperlyConfigured('Invalid ACTABLE_MODELS, must '
-                'implement get_actable_relations method: %s' % name)
+                                       'implement get_actable_relations method: %s' % name)
 
         if not (hasattr(model_class, 'get_actable_json') or
                 hasattr(model_class, 'get_actable_html')):
             raise ImproperlyConfigured('Invalid ACTABLE_MODELS, must '
-                'implement either JSON or HTML cache method: %s' % name)
+                                       'implement either JSON or HTML cache method: %s' % name)
         model_classes.append(model_class)
 
     return model_classes
 
+
 class ActableConfig(AppConfig):
     name = 'actable'
+
     def ready(self):
         '''
         Setup ACTABLE_MODELS, which are automatically assigned pre-save hooks
@@ -46,4 +49,3 @@ class ActableConfig(AppConfig):
 
         # Register pre_save hooks for all classes that were specified
         signals.register_all(model_classes)
-

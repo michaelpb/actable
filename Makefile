@@ -60,3 +60,21 @@ release: clean ## package and upload a release
 sdist: clean ## package
 	python setup.py sdist
 	ls -l dist
+
+bump-and-push: test lint
+	bumpversion patch
+	git push
+	git push --tags
+	make release
+
+cleanup-pep8: ## Auto fix a few issues
+	autoflake --in-place --remove-all-unused-imports --remove-unused-variables -r actable
+	autoflake --in-place --remove-all-unused-imports --remove-unused-variables -r example
+	autoflake --in-place --remove-all-unused-imports --remove-unused-variables -r tests
+	autopep8 --in-place -r actable
+	autopep8 --in-place -r example
+	autopep8 --in-place -r tests
+	isort -rc --atomic actable
+	isort -rc --atomic example
+	isort -rc --atomic tests
+

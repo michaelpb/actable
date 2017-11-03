@@ -1,11 +1,9 @@
 import json
 
+from actable.utils import get_gfk
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ImproperlyConfigured
 from django.db import models, transaction
-
-from actable.utils import get_gfk
 
 
 def get_events(instance, key, start=None, end=None):

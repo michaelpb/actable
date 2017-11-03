@@ -2,6 +2,7 @@ from django.db import models
 
 # NOTE: These models are also used in unit test suite
 
+
 class Author(models.Model):
     name = models.CharField(max_length=140)
     bio = models.CharField(max_length=220)
@@ -76,4 +77,3 @@ class Follow(models.Model):
             'object_url': self.author.get_absolute_url(),
             'verb': 'followed',
         }
-

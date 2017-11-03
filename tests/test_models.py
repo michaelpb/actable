@@ -9,11 +9,10 @@ Tests for `actable` models module.
 """
 import json
 
-from django.test import TestCase
-
 from actable.models import ActableEvent, ActableRelation
-from actable.helpers import EventDictPaginator
+from django.test import TestCase
 from example.microblog.models import Author, Follow, MicroPost
+
 
 class TestActableModels(TestCase):
     def setUp(self):
@@ -68,7 +67,7 @@ class TestActableModels(TestCase):
         # Check JSON
         all_jsons = set([
             act.cached_json for act in list(ActableRelation.objects.all()) +
-                list(ActableEvent.objects.all())
+            list(ActableEvent.objects.all())
         ])
         self.assertEqual(len(all_jsons), 1)
         json_parsed = json.loads(list(all_jsons)[0])
@@ -84,7 +83,7 @@ class TestActableModels(TestCase):
         # Check HTML
         all_htmls = set([
             act.cached_html for act in list(ActableRelation.objects.all()) +
-                list(ActableEvent.objects.all())
+            list(ActableEvent.objects.all())
         ])
         self.assertEqual(len(all_htmls), 1)
         html = list(all_htmls)[0]
@@ -92,4 +91,3 @@ class TestActableModels(TestCase):
 
     def tearDown(self):
         pass
-

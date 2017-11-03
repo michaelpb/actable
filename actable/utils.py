@@ -2,6 +2,7 @@ import json
 
 from django.contrib.contenttypes.models import ContentType
 
+
 def get_gfk(instance):
     '''
     Given a model instance, returns a dictionary of the content_type and
@@ -12,6 +13,7 @@ def get_gfk(instance):
         'content_type': content_type,
         'object_id': instance.id,
     }
+
 
 def parse_json_list(json_iterable):
     '''
@@ -26,9 +28,11 @@ def parse_json_list(json_iterable):
         for item in json_iterable
     ]
 
+
 class HtmlWrapper(dict):
     def __str__(self):
         return self['cached_html']
+
 
 def parse_html_list(html_list):
     '''

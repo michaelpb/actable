@@ -1,9 +1,8 @@
-from django.shortcuts import render, redirect
-
-from microblog.models import MicroPost, Author, Follow
-from microblog.forms import MicroPostForm, AuthorForm, FollowForm
-
 from actable.helpers import EventDictPaginator
+from django.shortcuts import redirect, render
+from microblog.forms import AuthorForm, FollowForm, MicroPostForm
+from microblog.models import Author, MicroPost
+
 
 def index(request):
     return render(request, 'index.html', {
@@ -13,17 +12,21 @@ def index(request):
         'authors': Author.objects.all(),
     })
 
+
 def new_author(request):
     AuthorForm(request.POST).save()
     return redirect('/')
+
 
 def new_post(request):
     inst = MicroPostForm(request.POST).save()
     return redirect('/posts/%s/' % inst.author.name)
 
+
 def new_follow(request):
     FollowForm(request.POST).save()
     return redirect('/')
+
 
 def view_posts(request, username):
     author = Author.objects.get(name=username)

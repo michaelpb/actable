@@ -1,8 +1,6 @@
-from django.conf.urls import url, include
+from django.conf.urls import url
 from django.contrib import admin
-
 from microblog import views as mb_views
-
 
 urlpatterns = [
     url(r'^$', mb_views.index),

@@ -9,15 +9,14 @@ Tests for `actable` helper functions and classes.
 """
 import json
 
-from django.test import SimpleTestCase, TestCase
-
 from actable.apps import check_and_get_actable_models
-from actable.signals import post_save_handler
-from django.core.exceptions import ImproperlyConfigured
-from example.microblog.models import Author
 from actable.models import ActableEvent
-
+from actable.signals import post_save_handler
 from actable.utils import get_gfk
+from django.core.exceptions import ImproperlyConfigured
+from django.test import SimpleTestCase, TestCase
+from example.microblog.models import Author
+
 
 class TestActableSettings(SimpleTestCase):
     def test_settings_empty_pagination(self):
@@ -45,6 +44,7 @@ class TestActableSettings(SimpleTestCase):
         with self.assertRaises(ImproperlyConfigured) as cm:
             check_and_get_actable_models(FauxSettings)
         self.assertIn('must implement', str(cm.exception))
+
 
 class TestActableSignals(TestCase):
     def test_post_save_handler_created(self):
