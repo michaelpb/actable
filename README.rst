@@ -41,27 +41,25 @@ Quick start
 **Overview:**
 
 1. Install actable and put in requirements file
-
 2. Add to INSTALLED_APPS
-
-3. Pick several important models to implement the actable interface so that
-every save or update generates an event
-
+3. Pick several important models to implement the actable interface so that every save or update generates an event
 4. Add those models to ACTABLE_MODELS
-
 5. Use helper classes to add a streams to your views
 
 ---------------
 
-Install:
+1. Install
+~~~~~~~~~~
+
 
 .. code-block:: bash
 
     pip install actable
 
+2. Add to INSTALLED_APPS
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-Add it to your `INSTALLED_APPS`:
-
+In your ``settings.py`` file, add something like:
 
 .. code-block:: python
 
@@ -71,16 +69,19 @@ Add it to your `INSTALLED_APPS`:
         ...
     )
 
+3. Implement Actable interface in one or more models
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Pick one or more models to be your actable models. Whenever these models are
 updated or created, it will generate events. These events can involve any
 number of other objects.
 
-You must implement at least 2 methods on your actable models. The first method
-is ``get_actable_relations`` which must return a dictionary where all the
-values are model instances that are related to this action.  Instead of
-limiting yourself to "Actor, Verb, Object", this allows you to have any number
-of relations.  Each one of these model instances will receive a copy of this
-event to its activity stream.
+To implement the required interface, you must implement at least 2 methods on
+your actable models. The first method is ``get_actable_relations`` which must
+return a dictionary where all the values are model instances that are related
+to this action.  Instead of limiting yourself to "Actor, Verb, Object", this
+allows you to have any number of relations.  Each one of these model instances
+will receive a copy of this event to its activity stream.
 
 Example:
 
@@ -133,6 +134,10 @@ Example:
                 self.title
             )
 
+
+4. Add to ACTABLE_MODELS list
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Finally, you should list your newly improved as an ``ACTABLE_MODEL``, as such:
 
 .. code-block:: python
@@ -141,6 +146,31 @@ Finally, you should list your newly improved as an ``ACTABLE_MODEL``, as such:
         'myapp.ProjectBlogPost',
     ]
 
+
+5. Include stream in your views
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In your views, you can use the EventDictPaginator to easily include streams.
+This will fetch streams relveant to any given model specified as an "actable
+relation" (that is, it works on more models than just the ``ACTABLE_MODELS``)
+
+Example:
+
+.. code-block:: python
+
+    from actable.helpers import EventDictPaginator
+    ...
+
+    def view_user(request, username):
+        user = User.objects.get(username=username)
+        event_paginator = EventDictPaginator(user, 50)
+        return render(request, 'userpage.html', {
+            stream: event_paginator.page(request.get('page', 1)),
+        })
+
+EventDictPaginator will consist of de-serialized dicts, exactly as you
+generated them in ``get_actable_json``, with one added property ``date``, which
+will be a Python ``datetime`` for the event.
 
 Credits
 -------
