@@ -82,25 +82,6 @@ class ActableEvent(ActableBase):
     def get_principle_object(self):
         return self.content_object
 
-    def rerender_to_cache(self):
-        # TODO: Add option to pass in pre-fetched relations since often
-        # at least one relation will already be fetched
-        relations = ActableRelations.objects.filter(stream_item=self) \
-            .select_related('context_object')
-        self.render_to_cache(relations)
-
-    def render(self, template_string, relations):
-        '''
-        Renders all 
-        '''
-        context = {
-            relation.relation: relation.context_object
-            for relation in relations
-        }
-
-        context['date'] = self.date
-        return Template(template_string).render(context)
-
     def create_relations_from_self(self, relation_context):
         '''
         Given a relation_context dictionary, create in the database all
