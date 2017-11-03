@@ -106,9 +106,21 @@ Before you submit a pull request, check that it meets these guidelines:
    https://travis-ci.org/michaelpb/actable/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
+Running tests
+~~~~~~~~~~~
+
+Does stuff work...?
+
+ -::
+  
+  -    source <YOURVIRTUALENV>/bin/activate
+  -    (myenv) $ pip install tox
+  -    (myenv) $ tox
+
 Tips
 ----
 
 To run a subset of tests::
 
     $ python -m unittest tests.test_actable
+

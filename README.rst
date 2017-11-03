@@ -1,5 +1,5 @@
 =============================
-actable
+Django Actable
 =============================
 
 .. image:: https://badge.fury.io/py/actable.svg
@@ -11,53 +11,49 @@ actable
 .. image:: https://codecov.io/gh/michaelpb/actable/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/michaelpb/actable
 
-Flexible activity stream for Python Django supporting an arbitrary number of
-associated objects and fast denormalized look-ups. Rendering can be fast too,
-with in-DB cached HTML and/or context.
-
-The purpose of Actable is to make it easy and unobtrusive to add activity
-log-like streams to as many objects in your database as possible, and make
-fetching and rendering those simple and fast: a single query without joins,
-selecting and ordering only on indexed fields.
-
+Activity stream for Python Django. Unlike other activity streams, it is much
+more flexible, with every event designed to supporting an arbitrary number of
+associated objects. It also is designed to be unobtrusive: Any of your models
+can be registered as an activity generator, all you need to do is generate a
+data structure for context, or an HTML fragment.
 
 Features
 --------
 
-Instead of limiting yourself to "Actor, Verb, Object", you can have any number
-of relations specified by a dictionary, as such:
+- Very easily / magically integrated into an existing system, with signals
+  being auto-generated based on principle objects
+- Arbitrary number of objects can be associated with every event
+- Fast look ups with denormalized events (no joins)
+- Looking up streams for particular actors or objects
+- Decent test coverage
+- Handy Paginator helper class to page through stream
+- Example project
 
-.. code-block:: python
-
-    class ProjectBlogPost:
-        def get_actable_relations(self):
-            # 'Alice created Blog Post Title about Project Name, on the topic
-            # of Space'
-            return {
-                'subject': self.user,
-                'verb': 'created',
-                'object': self,
-                'project': self.project,
-                'topic': self.topic,
-            }
-
-The notable advantage of this is that the event would be accessible from the
-user page, the project page, the blog post page, and even the topic page (e.g.,
-all related objects are linked).  Since this would normally result in a
-complicated and arbitrary JOIN across many tables, the context (and,
-optionally, rendered HTML snippets) are cached for each content type, so only a
-much simpler query is required.
+- **Not yet implemented:** Follow
 
 
-Quickstart
-----------
+Quick start
+------------
 
-Install actable::
+**Overview:**
+
+1. Install actable and put in requirements file
+2. Add to INSTALLED_APPS
+3. Pick several important models to implement the actable interface so that
+every save or update generates an event
+4. Add those models to ACTABLE_MODELS
+5. Use helper classes to add a streams to your views
+
+
+Install:
+
+.. code-block:: bash
 
     pip install actable
 
-Add it to your `INSTALLED_APPS`, and specify which models to which you wish it
-to register save hooks:
+
+Add it to your `INSTALLED_APPS`:
+
 
 .. code-block:: python
 
@@ -67,25 +63,75 @@ to register save hooks:
         ...
     )
 
+Pick one or more models to be your actable models. Whenever these models are
+updated or created, it will generate events. These events can involve any
+number of other objects.
+
+You must implement at least 2 methods on your actable models. The first method
+is ``get_actable_relations`` which must return a dictionary where all the
+values are model instances that are related to this action.  Instead of
+limiting yourself to "Actor, Verb, Object", this allows you to have any number
+of relations.  Each one of these model instances will receive a copy of this
+event to its activity stream.
+
+Example:
+
+.. code-block:: python
+
+    class ProjectBlogPost:
+        def get_actable_relations(self, event):
+            return {
+                'subject': self.user,
+                'object': self,
+                'project': self.project,
+            }
+
+Now you must choose one of 2 other methods to implement. These constitute the
+data to cache for each event.
+
+The most versatile of the two is one that returns a dictionary containing
+entirely simple (serializable) data types. This will be stored in serialized
+form in your database.
+
+Example:
+
+.. code-block:: python
+
+    class ProjectBlogPost:
+        def get_actable_json(self, event):
+            verb = 'posted' if event.is_creation else 'updated'
+            return {
+                'subject': self.user.username,
+                'subject_url': self.user.get_absolute_url(),
+                'object': self.title,
+                'object_url': self.get_absolute_url(),
+                'project': self.project.title,
+                'verb': verb,
+            }
+
+
+The other option is caching an HTML snippet (string) that can be generated any
+way you see fit.
+
+Example:
+
+.. code-block:: python
+
+    class ProjectBlogPost:
+        def get_actable_html(self, event):
+            return '<a href="%s">%s</a> wrote %s' % (
+                self.user.get_absolute_url(),
+                self.user.username,
+                self.title
+            )
+
+Finally, you should list your newly improved as an ``ACTABLE_MODEL``, as such:
+.. code-block:: python
+
     ACTABLE_MODELS = [
-        'myapp.MyModel',
-        'myapp.MyOtherModel',
+        'myapp.ProjectBlogPost',
     ]
 
-Use
----
-
-
-Running Tests
--------------
-
-Does the code actually work?
-
-::
-
-    source <YOURVIRTUALENV>/bin/activate
-    (myenv) $ pip install tox
-    (myenv) $ tox
 
 Credits
 -------
