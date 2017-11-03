@@ -2,8 +2,8 @@
 Django Actable
 =============================
 
-.. image:: https://badge.fury.io/py/actable.svg
-    :target: https://badge.fury.io/py/actable
+.. image:: https://img.shields.io/pypi/v/actable.svg
+    :target: https://pypi.python.org/pypi/actable/
 
 .. image:: https://travis-ci.org/michaelpb/actable.svg?branch=master
     :target: https://travis-ci.org/michaelpb/actable
