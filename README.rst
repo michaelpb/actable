@@ -172,6 +172,23 @@ EventDictPaginator will consist of de-serialized dicts, exactly as you
 generated them in ``get_actable_json``, with one added property ``date``, which
 will be a Python ``datetime`` for the event.
 
+Other helpers
+-------------
+
+For more descriptive activity items in the style of 'Alice updated the blog
+post title from "2018 Plans" to "2018 goals"', there is a helper to
+detect changes between two versions of
+
+.. code-block:: python
+    from actable.helpers import ModelChangeDetector
+
+    post = ProjectBlogPost.objects.create(title='2018 Plans')
+    changes = ModelChangeDetector(post)
+    post.title = '2018 goals'
+    changes.get_editable_changes(title)
+    # Will return: {'title': ('2018 Plans', '2018 goals')}
+
+
 Credits
 -------
 

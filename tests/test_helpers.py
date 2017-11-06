@@ -8,13 +8,13 @@ test_helpers
 Tests for `actable` helper functions and classes.
 """
 
-from actable.helpers import EventDictPaginator, EventHtmlPaginator
+from actable.helpers import EventDictPaginator, EventHtmlPaginator, ModelChangeDetector
 from actable.models import ActableEvent
 from django.test import TestCase
 from example.microblog.models import Author, MicroPost
 
 
-class TestActableHelpers(TestCase):
+class TestActablePaginators(TestCase):
     def setUp(self):
         self.author = Author.objects.create(
             name='alice',
@@ -91,5 +91,28 @@ class TestActableHelpers(TestCase):
         html = list(all_htmls)[0]
         self.assertEqual(html, '<strong>alice</strong> wrote title')
 
-    def tearDown(self):
-        pass
+
+class TestChangeDetector(TestCase):
+    def setUp(self):
+        self.author = Author.objects.create(
+            name='alice',
+            bio='alice in wonderland',
+        )
+        self.d = ModelChangeDetector(self.author)
+
+    def test_change_detector_no_changes(self):
+        self.assertEqual(self.d.get_changes(), {})
+        self.assertEqual(self.d.get_editable_changes(), {})
+
+    def test_change_detector_changes(self):
+        self.author.name = 'bob'
+        change = {'name': ('alice', 'bob')}
+        self.assertEqual(self.d.get_changes(), change)
+        self.assertEqual(self.d.get_editable_changes(), change)
+
+    def test_change_detector_editable_changes(self):
+        self.author.id = 2
+        change = {'id': (1, 2)}
+        self.assertEqual(self.d.get_changes(), change)
+        self.assertEqual(self.d.get_editable_changes(), {})
+
