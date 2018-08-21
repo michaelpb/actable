@@ -57,6 +57,8 @@ class ActableEvent(ActableBase):
     Useful for generating a global stream, and regenerating Relations if
     anything changes.
     '''
+
+    # TODO: Store more info on the event, maybe full change dict..?
     cache_updated_date = models.DateTimeField(
         help_text='Date that the cache of this event was last updated',
         auto_now=True,
